@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "unificator_tools.h"
+
 char* read_file(char * filename)
 {
    char * buffer = NULL;
@@ -43,7 +45,7 @@ char* read_file(char * filename)
     return buffer;
 }
 
-int main(int argc , char ** argv)
+int main()
 {
 	//TODO : Take the directory where to read the file as argument
 	const char * output_directory = "/home/reddyat/workspace/unificator/working/";
@@ -54,10 +56,11 @@ int main(int argc , char ** argv)
   
     if (directory_pointer == NULL)
     { 
-        printf("Could not open current directory" ); 
+        printf("Could not open working directory : %s", output_directory); 
         return 0; 
-    } 
-  
+    }
+
+    /* We iterate on all files in the directory output_directory. */
     while ( (directory_entry = readdir(directory_pointer)) != NULL )
     {
     	/* We don't process hidden files and the current directory file "." */
@@ -72,14 +75,14 @@ int main(int argc , char ** argv)
 
     		if ( file_content != NULL )
     		{
-    			// TODO : Find duplicate number.
-    			char * pch;
-				pch = strtok (file_content,"\n");
-				while (pch != NULL)
-  				{
-					printf ("%s\n",pch);
-					pch = strtok (NULL, "\n");
-				}
+    // 			// TODO : Find duplicate number.
+    // 			char * token;
+				// token = strtok (file_content,"\n");
+				// while (pch != NULL)
+  		// 		{	
+				// 	printf ("%s\n",pch);
+				// 	token = strtok (NULL, "\n");
+				// }
     		}
     		else
     		{

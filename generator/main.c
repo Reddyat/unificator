@@ -3,13 +3,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-int main(int argc, char ** argv)
+
+int main()
 {
    	srand(time(NULL));
 
 	//TODO : Take the directory where to create the file as argument
 	const char * output_directory = "/home/reddyat/workspace/unificator/working/";
+
+
+	/* TODO : For the moment, we admit that if it fails, the directory already exists.
+	 * We do not consider a wrong path or bad rights. We will see this later. */
+	mkdir(output_directory, 0777);
 
 	for (int i = 1; i < 200; i++)
 	{
@@ -29,7 +37,7 @@ int main(int argc, char ** argv)
 		if(file_pointer == NULL)
    		{
       		printf("Error : unable to create file %s\n", full_filename);   
-      		return -1;             
+      		return -1;
    		}
 
 

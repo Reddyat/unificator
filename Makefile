@@ -1,4 +1,7 @@
 all:
 	make -C generator
 	make -C unificator
-	./unificator/unificator
+
+clean:
+	rm ./generator/generator
+	rm ./unificator/unificator

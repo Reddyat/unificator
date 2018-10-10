@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I. -Wall -Werror
+CFLAGS=-Wall -Wextra -O2
 OBJ = main.o
 
 %.o: %.cpp
