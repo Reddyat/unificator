@@ -1,0 +1,6 @@
+*.o
+generator
+unificator
+test_unificator_dynamic_array
+test_unificator_sort
+working/

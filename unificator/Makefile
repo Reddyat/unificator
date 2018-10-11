@@ -9,10 +9,14 @@ TEST_OBJ = unificator_dynamic_array.o
 unificator: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
-test: test_unificator_dynamic_array
+test: test_unificator_dynamic_array test_unificator_sort
 	./test_unificator_dynamic_array
+	./test_unificator_sort
 
 test_unificator_dynamic_array: test_unificator_dynamic_array.o unificator_dynamic_array.o
+	$(CC) -o $@ $^ $(CFLAGS)
+
+test_unificator_sort: test_unificator_sort.o unificator_sort.o unificator_dynamic_array.o
 	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
