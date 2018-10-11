@@ -1,6 +1,7 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -O2
+CFLAGS=-Wall -Wextra -g
 OBJ = main.o unificator_dynamic_array.o unificator_tools.o
+TEST_OBJ = unificator_dynamic_array.o
 
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -8,5 +9,13 @@ OBJ = main.o unificator_dynamic_array.o unificator_tools.o
 unificator: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
+test: test_unificator_dynamic_array
+	./test_unificator_dynamic_array
+
+test_unificator_dynamic_array: test_unificator_dynamic_array.o unificator_dynamic_array.o
+	$(CC) -o $@ $^ $(CFLAGS)
+
 clean:
-	rm -rf *.o unificator
+	rm -rf *.o
+	rm -rf unificator
+	rm -rf test_unificator_dynamic_array
