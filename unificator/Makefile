@@ -1,6 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -g
-OBJ = main.o unificator_dynamic_array.o unificator_tools.o unificator_sort.o unificator_timer.o
+OBJ = main.o unificator_dynamic_array.o unificator_tools.o unificator_sort.o \
+      unificator_timer.o unificator_socket.o
 
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)
