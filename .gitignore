@@ -1,6 +1,6 @@
 *.o
-generator
-unificator
+generator/generator
+unificator/unificator
 test_unificator_dynamic_array
 test_unificator_sort
 working/
