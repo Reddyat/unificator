@@ -11,7 +11,6 @@ int main()
 
 	/* Initialisation Test */
 	unificator_dynamic_array_init(&test_da);
-	// unificator_dynamic_array_print(&test_da);
 	assert( test_da.data != NULL );
 	assert( test_da.capacity == UNIFICATOR_INITIAL_ARRAY_CAPACITY );
 	assert( test_da.size == 0 );

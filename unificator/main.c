@@ -4,6 +4,9 @@
 #include <stdlib.h>
 
 #include "unificator_tools.h"
+#include "unificator_dynamic_array.h"
+#include "unificator_sort.h"
+#include "unificator_timer.h"
 
 char* read_file(char * filename)
 {
@@ -66,28 +69,82 @@ int main()
     	/* We don't process hidden files and the current directory file "." */
     	if ( strncmp(directory_entry->d_name, ".", 1) != 0 )
     	{
+            /* Begining of the process so we start the timer. */
+            unificator_timer_start();
+
     		char full_filename[256];
     		strcpy(full_filename, output_directory);
     		strcat(full_filename, directory_entry->d_name);
+
+            /* Trace. */
+            printf("Processing file %s\n", full_filename);
 
     		/* Time to unificate */
     		char * file_content = read_file(full_filename);
 
     		if ( file_content != NULL )
     		{
-    // 			// TODO : Find duplicate number.
-    // 			char * token;
-				// token = strtok (file_content,"\n");
-				// while (pch != NULL)
-  		// 		{	
-				// 	printf ("%s\n",pch);
-				// 	token = strtok (NULL, "\n");
-				// }
+                UnificatorDynamicArray number_list;
+                UnificatorDynamicArray duplicate_list;
+                unificator_dynamic_array_init(&number_list);
+                unificator_dynamic_array_init(&duplicate_list);
+
+                char * token;
+                token = strtok (file_content,"\n");
+                while (token != NULL)
+                {	
+                    /* Populate our dynamic_array. We almost multiple by 2 the space in RAM
+                       but will see afterwards if it's a problem. */
+                    uint32_t new_element;
+                    int res = unificator_string_to_uint32(token, &new_element);
+
+                    /* Convertion succeed. */
+                    if ( res == 0 )
+                    {
+                        unificator_dynamic_array_push(&number_list, new_element);
+                    }
+                    else /* Convertion failed. */
+                    {
+                        printf("Error: Convertion failed for the element %s in the file %s\n", token, full_filename);
+                    }
+
+                    token = strtok (NULL, "\n");
+                }
+
+                /* Check if we have at least 2 elements. No needed to process otherwise. */
+                if ( number_list.size >= 2 )
+                {
+                    /* Sorting. */
+                    unificator_sort_array(number_list.data, number_list.size);
+
+                    /* Find duplicates. */
+                    /* We will check each element with the previous one to prevent buffer overflow. */
+                    /* That's why we begin the iterating to 1. */
+                    for ( size_t i = 1; i < number_list.size; i++ )
+                    {
+                        if ( number_list.data[i] == number_list.data[i-1] )
+                        {
+                            /* Duplicates !!!!! */
+                            unificator_dynamic_array_push(&duplicate_list, number_list.data[i]);
+                        }
+                    }
+
+                    /* Sending to the socket. */
+                    printf("Timer : %d\n", unificator_timer_get());
+
+                    unificator_dynamic_array_print(&number_list);
+                    unificator_dynamic_array_print(&duplicate_list);
+
+                    unificator_dynamic_array_free(&number_list);
+                    unificator_dynamic_array_free(&duplicate_list);
+                }
     		}
     		else
     		{
     			printf("Error : unable to read the content of the file %s\n", directory_entry->d_name);
     		}
+
+            free(file_content);
     	}
     }
   
