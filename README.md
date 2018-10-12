@@ -11,7 +11,7 @@
 * Nous attendons un programme C compilable sous Linux
 
 
-## Quelques indications :
+### Quelques indications :
 
  
 * Il n'y a pas de bonne ou mauvaise réponse
