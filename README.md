@@ -11,7 +11,7 @@
 * Nous attendons un programme C compilable sous Linux
 
 
-Quelques indications :
+## Quelques indications :
 
  
 * Il n'y a pas de bonne ou mauvaise réponse
@@ -28,14 +28,14 @@ Quelques indications :
 Il va falloir trois binaires pour avoir un système fonctionnel.
 
 1. generator :
-	Obligatoire -> Créer les fichiers contenant les nombres entiers dans un répertoire donné en argument
-	Facultatif  -> Choisir la vitesse de création via les arguments
+  * Obligatoire -> Créer les fichiers contenant les nombres entiers dans un répertoire donné en argument
+  * Facultatif  -> Choisir la vitesse de création via les arguments
 
 2. unificator :
-	Obligatoire -> Lire le répertoire contenant les fichiers et envoyer via une socket des informations de traitement (objet de l'énoncé)
+  * Obligatoire -> Lire le répertoire contenant les fichiers et envoyer via une socket des informations de traitement (objet de l'énoncé)
 
 3. tablodebor
-	Obligatoire -> Lire les informations envoyés par unificator et les afficher sur la console
+  * Obligatoire -> Lire les informations envoyés par unificator et les afficher sur la console
 
 
 # TODO
