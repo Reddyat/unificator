@@ -101,7 +101,7 @@ tous les messages reçus séparés par des sauts de ligne.
 
 # Lancement
 
-Ouvrez trois terminals différents et exécutez un outil par terminal dans l'ordre suivant :
+Ouvrez trois terminaux différents et exécutez un outil par terminal dans l'ordre suivant :
 
 1. ./tablodebor.py -i 127.0.0.1 -p 4242
 2. ./unificator/unificator -d working -i 127.0.0.1 -p 4242
