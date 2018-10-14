@@ -32,7 +32,7 @@ int unificator_socket_send(UnificatorSocket * unificator_socket, const char * me
 
     if ( send_result < 0 )
     {
-        perror("cannot send message");
+        perror("Error : cannot send message");
         close(unificator_socket->socket);
         return -1;
     }

@@ -5,10 +5,10 @@
 
 void unificator_sort_array(uint32_t * array, size_t array_size)
 {
-	qsort(array, array_size, sizeof(uint32_t), &unificator_compare_uint32_t);
+	qsort(array, array_size, sizeof(uint32_t), &_unificator_compare_uint32_t);
 }
 
-int unificator_compare_uint32_t(const void * left_integer, const void * rigth_integer)
+int _unificator_compare_uint32_t(const void * left_integer, const void * rigth_integer)
 {
 	if ( *((uint32_t *) left_integer) < *((uint32_t *) rigth_integer) )
 	{

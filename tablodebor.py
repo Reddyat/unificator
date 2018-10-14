@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import socket
@@ -18,8 +18,8 @@ if not args.ip or not args.port:
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 server_address = (args.ip, args.port)
-print 'starting up on %s port %s' % server_address
+print("Listen on {} port {}".format(server_address[0], server_address[1]))
 sock.bind(server_address)
 
 while True:
-    print(sock.recv(4096))
+    print(sock.recv(4096).decode())

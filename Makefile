@@ -6,5 +6,5 @@ test:
 	make -C unificator test
 
 clean:
-	rm ./generator/generator
-	rm ./unificator/unificator
+	make -C generator clean
+	make -C unificator clean

@@ -9,10 +9,17 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <signal.h>
+#include <ctype.h>
 
 #define FILEPATH_SIZE_MAX 4096
+#define VELOCITY 1000
 
 static int keep_running = 1;
+
+void help()
+{
+    printf("Usage : generator -o <output_directory>\n");
+}
 
 void int_handler()
 {
@@ -20,16 +27,55 @@ void int_handler()
     keep_running = 0;
 }
 
-int main()
+int main(int argc, char ** argv)
 {
+    /************* HANDLE SIGINT ****************/
     struct sigaction act = {0};
     act.sa_handler = int_handler;
     sigaction(SIGINT, &act, NULL);
 
+    /************ PARSING ARGUMENTS **************/
+    char option;
+    char * output_directory = NULL;
+
+    while ( (option = getopt(argc, argv, "o:")) != -1 )
+    {
+        switch ( option )
+        {
+            case 'o':
+                output_directory = optarg;
+                break;
+
+            case '?':
+                if ( optopt == 'o' )
+                    fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+                else if ( isprint(optopt) )
+                    fprintf(stderr, "Unknown option -%c.\n", optopt);
+                else
+                    fprintf(stderr, "Unknown option character 0x%x.\n", optopt);
+
+                help();
+                return -1;
+
+            default:
+                help();
+                return -1;
+        }   
+    }
+
+    if ( output_directory == NULL )
+    {
+        fprintf(stderr, "Bad arguments : output_directory is mandatory.\n");
+        help();
+        return -1;
+    }
+
+    /*************** DISPLAY ************/
+    printf("Generating about %d files per second in the directory %s...\n",VELOCITY, output_directory);
+
+    /*************** GENERATING FILES ****************/
     srand(time(NULL));
 
-    //TODO : Take the directory where to create the file as argument
-    const char * output_directory = "/home/reddyat/workspace/unificator/working";
     uint32_t filename = 0;
 
     /* TODO : For the moment, we admit that if it fails, the directory already exists.
@@ -72,7 +118,7 @@ int main()
         filename++;
 
         /* You are too fast for unificator, sorry dude. */
-        if ( filename % 1000 == 0 )
+        if ( filename % VELOCITY == 0 )
         {
             sleep(1);
         }

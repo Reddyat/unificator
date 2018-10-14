@@ -58,5 +58,5 @@ void unificator_format_message(char * message, char * filename,
         remaining_size -= writed_counter;
     }
 
-    snprintf(&message[position], remaining_size, "in %d microseconds.\n", processing_time);
+    snprintf(&message[position], remaining_size, "in %d microseconds.", processing_time);
 }

@@ -13,6 +13,6 @@ void unificator_sort_array(uint32_t * array, size_t array_size);
   * @brief Compare two uint32_t.
   * @return -1 if left < rigth, 1 if left > rigth, 0 if left == rigth.
   */
-int unificator_compare_uint32_t(const void * left_integer, const void * rigth_integer);
+int _unificator_compare_uint32_t(const void * left_integer, const void * rigth_integer);
 
 #endif /* UNIFICATOR_SORT_H */

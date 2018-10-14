@@ -5,27 +5,24 @@
 
 #include "unificator_timer.h"
 
-/* Global variable for the timer. */
-static struct timeval tv;
-
-void unificator_timer_start()
+void unificator_timer_start(struct timeval * tv)
 {
-	_unificator_timer_now(&tv);
+	_unificator_timer_now(tv);
 }
 
-int32_t unificator_timer_get()
+int32_t unificator_timer_get(struct timeval * tv)
 {
 	struct timeval now;
 	_unificator_timer_now(&now);
 
-	if ( now.tv_sec < tv.tv_sec )
+	if ( now.tv_sec < tv->tv_sec )
 	{
 		printf("Error: Clock changed during the processing or processing duration too long.");
 		return -1;
 	}
 
-	time_t diff_seconds = now.tv_sec - tv.tv_sec;
-	suseconds_t diff_microseconds = now.tv_usec - tv.tv_usec;
+	time_t diff_seconds = now.tv_sec - tv->tv_sec;
+	suseconds_t diff_microseconds = now.tv_usec - tv->tv_usec;
 
 	return (diff_seconds * 1000000) + diff_microseconds;
 }
