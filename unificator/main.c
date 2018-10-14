@@ -2,6 +2,8 @@
 #include <dirent.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
 
 #include "unificator_tools.h"
 #include "unificator_dynamic_array.h"
@@ -49,19 +51,79 @@ char* read_file(char * filename)
     return buffer;
 }
 
-int main()
+void help()
 {
-    //TODO : Take the directory where to read the file as argument
-    const char * output_directory = "/home/reddyat/workspace/unificator/working/";
+    printf("Usage : unificator -d <input_directory> -i <ip_address> -p <port>\n");
+}
 
+int main(int argc, char ** argv)
+{
+
+    /************ PARSING ARGUMENTS **************/
+    char option;
+    char * input_directory = NULL;
+    char * ip = NULL;
+    char * port_value = NULL;
+    uint16_t port;
+
+    while ( (option = getopt(argc, argv, "d:i:p:")) != -1 )
+    {
+        switch ( option )
+        {
+            case 'd':
+                input_directory = optarg;
+                break;
+
+            case 'i':
+                ip = optarg;
+                break;
+
+            case 'p':
+                port_value = optarg;
+                break;
+
+            case '?':
+                if ( optopt == 'd' || optopt == 'i' || optopt == 'p' )
+                    fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+                else if ( isprint(optopt) )
+                    fprintf(stderr, "Unknown option -%c.\n", optopt);
+                else
+                    fprintf(stderr, "Unknown option character 0x%x.\n", optopt);
+
+                help();
+                return -1;
+
+            default:
+                help();
+                return -1;
+        }   
+    }
+
+    if ( input_directory == NULL || ip == NULL || port_value == NULL )
+    {
+        fprintf(stderr, "Bad arguments : all arguments are mandatory.\n");
+        help();
+        return -1;
+    }
+
+    if ( unificator_string_to_uint16(port_value, &port) != 0 )
+    {
+        fprintf(stderr, "Bad argument : port value must be > 0 and < 65536.");
+        help();
+        return -1;
+    }
+
+    /* TODO : Check the ip_adress. */
+
+    /*************** LIST AND PROCESS FILES *******************/
     struct dirent * directory_entry;
 
-    DIR * directory_pointer = opendir(output_directory);
+    DIR * directory_pointer = opendir(input_directory);
 
-    if (directory_pointer == NULL)
+    if ( directory_pointer == NULL )
     { 
-        printf("Could not open working directory : %s", output_directory); 
-        return 0; 
+        printf("Could not open working directory : %s", input_directory); 
+        return -1; 
     }
 
     /* We create and initialize what we need for all the process duration. */
@@ -70,11 +132,16 @@ int main()
     unificator_dynamic_array_init(&number_list);
     unificator_dynamic_array_init(&duplicate_list);
     char message[MESSAGE_SIZE_MAX];
+
     UnificatorSocket socket;
-    unificator_socket_init(&socket, "127.0.0.1", 4242);
+    if ( unificator_socket_init(&socket, ip, port) != 0 )
+    {
+        fprintf(stderr, "Unable to open the socket, please verify the ip adress you gave in argument.");
+        return -1;
+    }
 
 
-    /* We iterate on all files in the directory output_directory. */
+    /* We iterate on all files in the input_directory. */
     while ( (directory_entry = readdir(directory_pointer)) != NULL )
     {
         /* We don't process hidden files and the current directory file "." */
@@ -85,12 +152,14 @@ int main()
 
             /* TODO: use snprintf. */
             char full_filename[256];
-            strcpy(full_filename, output_directory);
+            strcpy(full_filename, input_directory);
             strcat(full_filename, directory_entry->d_name);
 
             /* Trace. */
-            printf("Processing file %s\n", full_filename);
-
+            #ifdef DEBUG
+                printf("Processing file %s\n", full_filename);
+            #endif
+            
             /* Time to unificate */
             char * file_content = read_file(full_filename);
 
@@ -115,7 +184,7 @@ int main()
                         printf("Error: Convertion failed for the element %s in the file %s\n", token, full_filename);
                     }
 
-                    token = strtok (NULL, "\n");
+                    token = strtok(NULL, "\n");
                 }
 
                 /* Check if we have at least 2 elements. No needed to process otherwise. */
@@ -136,25 +205,28 @@ int main()
                         }
                     }
 
-                    /* Sending to the socket. */
-                    unificator_format_message(message, full_filename, &duplicate_list, unificator_timer_get());
-                    unificator_socket_send(&socket, message, strlen(message) + 1); /* +1 for the \0 */
+                    if ( duplicate_list.size > 0 )
+                    {
+                        /* Sending to the socket. */
+                        unificator_format_message(message, full_filename, &duplicate_list, unificator_timer_get());
+                        unificator_socket_send(&socket, message, strlen(message) + 1); /* +1 for the \0 */
+                    }
 
                     /* We clear our dynamic array for the next file. */
                     unificator_dynamic_array_clear(&number_list);
                     unificator_dynamic_array_clear(&duplicate_list);
                 }
+
+                free(file_content);
             }
             else
             {
                 printf("Error : unable to read the content of the file %s\n", directory_entry->d_name);
             }
-
-            free(file_content);
         }
     }
 
-    /* Time to clean. */
+    /**************** CLEANING *******************/
     unificator_dynamic_array_free(&number_list);
     unificator_dynamic_array_free(&duplicate_list);
     unificator_socket_close(&socket);

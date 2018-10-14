@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -g
+CFLAGS=-Wall -Wextra -O2
 OBJ = main.o unificator_dynamic_array.o unificator_tools.o unificator_sort.o \
       unificator_timer.o unificator_socket.o
 

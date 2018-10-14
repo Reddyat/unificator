@@ -7,30 +7,35 @@
 
 #include "unificator_tools.h"
 
-int unificator_string_to_uint32(char * input_string, uint32_t * output_value)
+int unificator_string_to_uint16(char * input_string, uint16_t * output_value)
 {
-    const int base = 10;
-    char *endptr;
-    uint32_t converted_value;
-
+    char * end;
     errno = 0;
-    converted_value = strtoul(input_string, &endptr, base);
+    intmax_t converted_value = strtoimax(input_string, &end, 10);
 
-    /* Check several error cases. */
-
-    /* Too big number. */
-    if ( (errno == ERANGE && converted_value == ULONG_MAX) )
+    if (errno == ERANGE || converted_value < 0 || converted_value > UINT16_MAX || end == input_string || *end != '\0')
     {
         return -1;
     }
 
-    /* Invalid number. */
-    if ( endptr == input_string && converted_value == 0 )
+    *output_value = (uint16_t) converted_value;
+    
+    return 0;
+}
+
+int unificator_string_to_uint32(char * input_string, uint32_t * output_value)
+{
+    char * end;
+    errno = 0;
+    intmax_t converted_value = strtoimax(input_string, &end, 10);
+
+    if (errno == ERANGE || converted_value < 0 || converted_value > UINT32_MAX || end == input_string || *end != '\0')
     {
-    	return -1;
+        return -1;
     }
 
-    *output_value = converted_value;
+    *output_value = (uint32_t) converted_value;
+    
     return 0;
 }
 

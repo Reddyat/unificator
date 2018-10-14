@@ -7,6 +7,13 @@
 
 #define MESSAGE_SIZE_MAX 4096
 
+
+/**
+  * @brief Convert the <string> input_string in an uint16_t and store it in the variable <converted_value>
+  * @return 0 if the conversion succeed, -1 otherwise
+  */
+int unificator_string_to_uint16(char * input_string, uint16_t * output_value);
+
 /**
   * @brief Convert the <string> input_string in an uint32_t and store it in the variable <converted_value>
   * @return 0 if the conversion succeed, -1 otherwise
