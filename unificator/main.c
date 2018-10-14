@@ -4,12 +4,23 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <signal.h>
 
 #include "unificator_tools.h"
 #include "unificator_dynamic_array.h"
 #include "unificator_sort.h"
 #include "unificator_timer.h"
 #include "unificator_socket.h"
+
+#define FILEPATH_SIZE_MAX 4096
+
+static int keep_running = 1;
+
+void int_handler()
+{
+    printf("Ctrl-C catched, stopping unificator.\n");
+    keep_running = 0;
+}
 
 char* read_file(char * filename)
 {
@@ -18,31 +29,34 @@ char* read_file(char * filename)
     int read_size = 0;
     FILE *handler = fopen(filename, "r");
 
-    if (handler)
+    if (  handler )
     {
-/* Seek the last byte of the file */
+        /* Seek the last byte of the file */
         fseek(handler, 0, SEEK_END);
-/* Offset from the first to the last byte, or in other words, filesize */
+        /* Offset from the first to the last byte, or in other words, filesize */
         string_size = ftell(handler);
-/* go back to the start of the file */
+        /* go back to the start of the file */
         rewind(handler);
 
-/* Allocate a string that can hold it all */
+        /* Allocate a string that can hold it all */
         buffer = (char*) malloc(sizeof(char) * (string_size + 1) );
 
-/* Read it all in one operation */
-        read_size = fread(buffer, sizeof(char), string_size, handler);
-
-/* fread doesn't set it so put a \0 in the last position
-* and buffer is now officially a string */
-        buffer[string_size] = '\0';
-
-        if (string_size != read_size)
+        if ( buffer != NULL )
         {
-/* Something went wrong, throw away the memory and set
-* the buffer to NULL */
-            free(buffer);
-            buffer = NULL;
+            /* Read it all in one operation */
+            read_size = fread(buffer, sizeof(char), string_size, handler);
+
+            /* fread doesn't set it so put a \0 in the last position
+            * and buffer is now officially a string */
+            buffer[string_size] = '\0';
+
+            if (string_size != read_size)
+            {
+                /* Something went wrong, throw away the memory and set
+                * the buffer to NULL */
+                free(buffer);
+                buffer = NULL;
+            }
         }
 
         fclose(handler);
@@ -58,6 +72,10 @@ void help()
 
 int main(int argc, char ** argv)
 {
+    /************ SIGNAL MANAGEMENT **************/
+    struct sigaction act = {0};
+    act.sa_handler = int_handler;
+    sigaction(SIGINT, &act, NULL);
 
     /************ PARSING ARGUMENTS **************/
     char option;
@@ -140,90 +158,99 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-
-    /* We iterate on all files in the input_directory. */
-    while ( (directory_entry = readdir(directory_pointer)) != NULL )
+    while ( keep_running )
     {
-        /* We don't process hidden files and the current directory file "." */
-        if ( strncmp(directory_entry->d_name, ".", 1) != 0 )
+        /* We iterate on all files in the input_directory. */
+        while ( (directory_entry = readdir(directory_pointer)) != NULL && keep_running )
         {
-            /* Begining of the process so we start the timer. */
-            unificator_timer_start();
-
-            /* TODO: use snprintf. */
-            char full_filename[256];
-            strcpy(full_filename, input_directory);
-            strcat(full_filename, directory_entry->d_name);
-
-            /* Trace. */
-            #ifdef DEBUG
-                printf("Processing file %s\n", full_filename);
-            #endif
-            
-            /* Time to unificate */
-            char * file_content = read_file(full_filename);
-
-            if ( file_content != NULL )
+            /* We don't process hidden files and the current directory file "." */
+            if ( strncmp(directory_entry->d_name, ".", 1) != 0 )
             {
-                char * token;
-                token = strtok (file_content,"\n");
-                while (token != NULL)
-                { 
-                    /* Populate our dynamic_array. We almost multiple by 2 the space in RAM
-                       but will see afterwards if it's a problem. */
-                    uint32_t new_element;
-                    int res = unificator_string_to_uint32(token, &new_element);
+                /* Begining of the process so we start the timer. */
+                unificator_timer_start();
 
-                    /* Convertion succeed. */
-                    if ( res == 0 )
-                    {
-                        unificator_dynamic_array_push(&number_list, new_element);
-                    }
-                    else /* Convertion failed. */
-                    {
-                        printf("Error: Convertion failed for the element %s in the file %s\n", token, full_filename);
-                    }
+                /* Concatenate the directory and the filename. */
+                char filepath[FILEPATH_SIZE_MAX];
+                snprintf(filepath, FILEPATH_SIZE_MAX, "%s/%s", input_directory, directory_entry->d_name);
 
-                    token = strtok(NULL, "\n");
-                }
+                /* Trace. */
+                #ifdef DEBUG
+                    printf("Processing file %s\n", filepath);
+                #endif
+                
+                /* Time to unificate */
+                char * file_content = read_file(filepath);
 
-                /* Check if we have at least 2 elements. No needed to process otherwise. */
-                if ( number_list.size >= 2 )
+                if ( file_content != NULL )
                 {
-                    /* Sorting. */
-                    unificator_sort_array(number_list.data, number_list.size);
+                    char * token;
+                    token = strtok (file_content,"\n");
+                    while (token != NULL)
+                    { 
+                        /* Populate our dynamic_array. We almost multiple by 2 the space in RAM
+                           but will see afterwards if it's a problem. */
+                        uint32_t new_element;
+                        int res = unificator_string_to_uint32(token, &new_element);
 
-                    /* Find duplicates. */
-                    /* We will check each element with the previous one to prevent buffer overflow. */
-                    /* That's why we begin the iterating to 1. */
-                    for ( size_t i = 1; i < number_list.size; i++ )
-                    {
-                        if ( number_list.data[i] == number_list.data[i-1] )
+                        /* Convertion succeed. */
+                        if ( res == 0 )
                         {
-                            /* Duplicates !!!!! */
-                            unificator_dynamic_array_push(&duplicate_list, number_list.data[i]);
+                            unificator_dynamic_array_push(&number_list, new_element);
                         }
+                        else /* Convertion failed. */
+                        {
+                            printf("Error: Convertion failed for the element %s in the file %s\n", token, filepath);
+                        }
+
+                        token = strtok(NULL, "\n");
                     }
 
-                    if ( duplicate_list.size > 0 )
+                    /* Check if we have at least 2 elements. No needed to process otherwise. */
+                    if ( number_list.size >= 2 )
                     {
-                        /* Sending to the socket. */
-                        unificator_format_message(message, full_filename, &duplicate_list, unificator_timer_get());
-                        unificator_socket_send(&socket, message, strlen(message) + 1); /* +1 for the \0 */
+                        /* Sorting. */
+                        unificator_sort_array(number_list.data, number_list.size);
+
+                        /* Find duplicates. */
+                        /* We will check each element with the previous one to prevent buffer overflow. */
+                        /* That's why we begin the iterating to 1. */
+                        for ( size_t i = 1; i < number_list.size; i++ )
+                        {
+                            if ( number_list.data[i] == number_list.data[i-1] )
+                            {
+                                /* Duplicates !!!!! */
+                                unificator_dynamic_array_push(&duplicate_list, number_list.data[i]);
+                            }
+                        }
+
+                        if ( duplicate_list.size > 0 )
+                        {
+                            /* Sending to the socket. */
+                            unificator_format_message(message, filepath, &duplicate_list, unificator_timer_get());
+                            unificator_socket_send(&socket, message, strlen(message) + 1); /* +1 for the \0 */
+                        }
+
+                        /* We clear our dynamic array for the next file. */
+                        unificator_dynamic_array_clear(&number_list);
+                        unificator_dynamic_array_clear(&duplicate_list);
                     }
 
-                    /* We clear our dynamic array for the next file. */
-                    unificator_dynamic_array_clear(&number_list);
-                    unificator_dynamic_array_clear(&duplicate_list);
-                }
+                    free(file_content);
 
-                free(file_content);
-            }
-            else
-            {
-                printf("Error : unable to read the content of the file %s\n", directory_entry->d_name);
+                    if ( remove(filepath) != 0 )
+                    {
+                        fprintf(stderr, "Error : Unable to remove the file : %s.\n", filepath);
+                    }
+                }
+                else
+                {
+                    printf("Error : unable to read the content of the file %s\n", directory_entry->d_name);
+                }
             }
         }
+
+        /* We reinitialise the directory pointer because new files were created. */
+        rewinddir(directory_pointer);
     }
 
     /**************** CLEANING *******************/
