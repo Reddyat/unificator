@@ -37,7 +37,7 @@ Les nombres vont de 0 à la valeur maximale renvoyée par la fonction rand() (RA
 
 ### Usage
 
-./generator -o <output_directory>
+./generator -o *output_directory*
 
 **Remarque** :
 
@@ -65,7 +65,7 @@ Effectue les actions suivantes pour chaque fichier présent dans le répertoire 
 
 ### Usage
 
-./unificator -d <input_directory> -i <ip> -p <port>
+./unificator -d *input_directory* -i *ip* -p *port*
 
 **Remarque** :
 
@@ -87,7 +87,7 @@ tous les messages reçus séparés par des sauts de ligne.
 
 ### Usage
 
-./tablodebor.py -i <ip> -p <port>
+./tablodebor.py -i *ip* -p *port*
 
 ### Exemple
 
@@ -95,16 +95,16 @@ tous les messages reçus séparés par des sauts de ligne.
 
 # Compilation
 
-1 - git clone https://github.com/Reddyat/unificator.git
-2 - cd unificator
-3 - make
+1. git clone https://github.com/Reddyat/unificator.git
+2. cd unificator
+3. make
 
 # Lancement
 
 Ouvrez trois terminals différents et exécutez un outil par terminal dans l'ordre suivant :
 
-1 - ./tablodebor.py -i 127.0.0.1 -p 4242
-2 - ./unificator/unificator -d working -i 127.0.0.1 -p 4242
-3 - ./generator/generator -o working
+1. ./tablodebor.py -i 127.0.0.1 -p 4242
+2. ./unificator/unificator -d working -i 127.0.0.1 -p 4242
+3. ./generator/generator -o working
 
 Dans le terminal de tablodebor devrait s'afficher les duplicats trouvés par unificator.
