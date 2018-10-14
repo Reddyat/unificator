@@ -101,10 +101,20 @@ tous les messages reçus séparés par des sauts de ligne.
 
 # Lancement
 
-Ouvrez trois terminaux différents et exécutez un outil par terminal dans l'ordre suivant :
+Ouvrez trois terminaux différents et placez vous à la racine du projet.
+
+Exécutez un outil par terminal dans l'ordre suivant :
 
 1. ./tablodebor.py -i 127.0.0.1 -p 4242
 2. ./unificator/unificator -d working -i 127.0.0.1 -p 4242
 3. ./generator/generator -o working
 
 Dans le terminal de tablodebor devrait s'afficher les duplicats trouvés par unificator.
+
+# Arrêt
+
+Faite la combinaison de touche Ctrl-C dans chaque terminal dans l'ordre suivant (inverse au lancement) :
+
+1. generator
+2. unificator
+3. tablodebor.py
