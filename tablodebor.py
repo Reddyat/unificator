@@ -22,8 +22,4 @@ print 'starting up on %s port %s' % server_address
 sock.bind(server_address)
 
 while True:
-    print '\nwaiting to receive message'
-    data, address = sock.recvfrom(4096)
-    
-    print 'received %s bytes from %s'.format(len(data), address)
-    print data
+    print(sock.recv(4096))
